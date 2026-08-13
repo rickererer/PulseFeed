@@ -1,0 +1,22 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Local-only documents (kept on disk, not published)
+docs/interview-questions.md
+docs/resume-highlights.md
+docs/performance-testing.md
+
+# Backend
+apps/api/uploads/*
+apps/api/bin/
+*.exe
+
+# Frontend
+apps/web/node_modules/
+apps/web/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp

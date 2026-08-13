@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" fill="none">
+  <defs>
+    <linearGradient id="pulse-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22D3EE"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="tri-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon group: pulse waveform + play triangle -->
+  <g transform="translate(40, 40)">
+    <!-- pulse line: dot + waveform segments -->
+    <circle cx="8" cy="60" r="6" fill="url(#pulse-grad)"/>
+    <path d="M 18 60 L 36 60 L 50 28 L 68 92 L 84 60 L 108 60"
+          stroke="url(#pulse-grad)" stroke-width="7"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- play triangle embedded in the valley -->
+    <path d="M 102 46 L 102 74 L 122 60 Z" fill="url(#tri-grad)"/>
+    <!-- continuation -->
+    <path d="M 124 60 L 142 60 L 156 36 L 172 84 L 188 60"
+          stroke="url(#pulse-grad)" stroke-width="7"
+          stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+     font-weight="800" font-size="76" letter-spacing="-2">
+    <text x="240" y="118" fill="#0F172A">Pulse</text>
+    <text x="440" y="118" fill="url(#pulse-grad)">Feed</text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="240" y="158" font-family="Inter, sans-serif" font-size="18"
+        font-weight="500" fill="#64748B" letter-spacing="0.5">
+    Real-time Video Feed System · Built with Go
+  </text>
+</svg>
