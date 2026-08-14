@@ -17,7 +17,8 @@
   <a href="https://www.rabbitmq.com/"><img src="https://img.shields.io/badge/RabbitMQ-3.13-orange.svg?style=flat-square&color=FF6600&labelColor=161b22&logo=rabbitmq&logoColor=white" alt="RabbitMQ"/></a>
   <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-Compose-blue.svg?style=flat-square&color=2496ED&labelColor=161b22&logo=docker&logoColor=white" alt="Docker"/></a>
   <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-Web-blue.svg?style=flat-square&color=61DAFB&labelColor=161b22&logo=react&logoColor=white" alt="React"/></a>
-  <a href="https://prometheus.io/"><img src="https://img.shields.io/badge/Prometheus-+Grafana-orange.svg?style=flat-square&color=E6522C&labelColor=161b22" alt="Monitoring"/></a>
+  <a href="https://prometheus.io/"><img src="https://img.shields.io/badge/Prometheus-monitoring-orange.svg?style=flat-square&color=E6522C&labelColor=161b22&logo=prometheus&logoColor=white" alt="Prometheus"/></a>
+  <a href="https://grafana.com/"><img src="https://img.shields.io/badge/Grafana-dashboards-orange.svg?style=flat-square&color=F46800&labelColor=161b22&logo=grafana&logoColor=white" alt="Grafana"/></a>
 </p>
 
 <br/>
