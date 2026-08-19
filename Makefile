@@ -9,9 +9,10 @@ SHELL := /bin/bash
 dev:
 	./scripts/start.sh
 
-## 运行全部测试（后端 go test + 前端构建校验）
+## 运行全部测试（后端 go test + 前端 vitest + 构建校验）
 test:
 	cd apps/api && go test ./...
+	cd apps/web && npm test
 	cd apps/web && npm run build
 
 ## 生产构建（后端编译 + 前端打包）
