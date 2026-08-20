@@ -25,6 +25,26 @@ jobs:
       - name: Vet
         run: go vet ./...
 
+      - name: Check module hygiene
+        run: |
+          set +e
+          TIDY_OUT="$(go mod tidy -diff 2>&1 | grep -v '^go: downloading')"
+          TIDY_EXIT=$?
+          VERIFY_OUT="$(go mod verify 2>&1)"
+          VERIFY_EXIT=$?
+          set -e
+          echo "TIDY_EXIT=$TIDY_EXIT VERIFY_EXIT=$VERIFY_EXIT"
+          echo "TIDY_OUT=$TIDY_OUT"
+          echo "VERIFY_OUT=$VERIFY_OUT"
+          if [ -n "$TIDY_OUT" ]; then
+            echo "::error::go.mod/go.sum need tidy: $TIDY_OUT" | head -c 500
+            exit 1
+          fi
+          if [ "$VERIFY_EXIT" -ne 0 ]; then
+            echo "::error::go mod verify failed: $VERIFY_OUT"
+            exit 1
+          fi
+
       - name: Test with coverage
         run: go test ./... -coverprofile=coverage.out -covermode=count
 
