@@ -1,0 +1,7 @@
+# 强制 Go 模块文件使用 LF 行尾（go 工具链要求，防止 Windows 检出 CRLF 干扰 tidy/verify）
+apps/api/go.mod text eol=lf
+apps/api/go.sum text eol=lf
+Makefile text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
