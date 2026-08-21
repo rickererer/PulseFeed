@@ -23,6 +23,10 @@ var ErrLoadInteractionFailed = errors.New("failed to load interaction")
 var ErrSaveInteractionFailed = errors.New("failed to save interaction")
 var ErrUpdateInteractionFailed = errors.New("failed to update interaction")
 
+// ErrActionConflict 表示并发写入同一互动状态发生冲突（乐观锁/幂等竞争），
+// 调用方可映射为 409 Conflict 或提示客户端重试。
+var ErrActionConflict = errors.New("action state conflict, retry later")
+
 type Service struct {
 	repo             domaininteraction.Repository
 	hotScoreRecorder HotScoreRecorder
@@ -309,6 +313,9 @@ func (s *Service) setActionAsync(ctx context.Context, userID int64, videoID int6
 
 	state, err := s.actionStateStore.SetActionState(ctx, userID, videoID, actionType, active, idempotencyKey, initialStat)
 	if err != nil {
+		if errors.Is(err, ErrActionConflict) {
+			return nil, ErrActionConflict
+		}
 		return nil, ErrUpdateInteractionFailed
 	}
 

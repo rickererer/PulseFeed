@@ -277,6 +277,10 @@ func writeInteractionError(c *gin.Context, err error) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "comment permission denied"})
 		return
 	}
+	if errors.Is(err, applicationinteraction.ErrActionConflict) {
+		c.JSON(http.StatusConflict, gin.H{"error": "action conflict, please retry"})
+		return
+	}
 	c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 }
 

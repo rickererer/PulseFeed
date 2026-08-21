@@ -8,6 +8,7 @@ import (
 	inframetrics "github.com/rickererer/PulseFeed/internal/infra/metrics"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -511,6 +512,10 @@ func (c *FeedCache) SetActionState(ctx context.Context, userID int64, videoID in
 		return nil
 	}, actionKey)
 	if err != nil {
+		// Watch 事务冲突（乐观锁）：并发修改了同一行为状态，是预期竞争而非系统错误。
+		if errors.Is(err, redis.TxFailedErr) {
+			return nil, applicationinteraction.ErrActionConflict
+		}
 		return nil, err
 	}
 
