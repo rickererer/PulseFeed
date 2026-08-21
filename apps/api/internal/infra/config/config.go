@@ -28,6 +28,11 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, ErrUnmarshalConfigFailed
 	}
 
+	// 校验必填项，让配置问题尽早在启动阶段暴露。
+	if err := cfg.Validate(); err != nil {
+		return nil, err
+	}
+
 	// 这里不做复杂默认值填充，让配置问题尽早在启动阶段暴露。
 	return cfg, nil
 }
