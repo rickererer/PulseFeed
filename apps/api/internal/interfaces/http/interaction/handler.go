@@ -215,7 +215,7 @@ func parseLimit(raw string) (int, error) {
 		return 0, nil
 	}
 	limit, err := strconv.Atoi(raw)
-	if err != nil || limit <= 0 {
+	if err != nil || limit <= 0 || limit > domaininteraction.MaxLimit {
 		return 0, domaininteraction.ErrInvalidLimit
 	}
 	return limit, nil

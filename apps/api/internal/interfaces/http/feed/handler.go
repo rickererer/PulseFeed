@@ -99,7 +99,7 @@ func parseLimit(raw string) (int, error) {
 	}
 
 	limit, err := strconv.Atoi(raw)
-	if err != nil || limit <= 0 {
+	if err != nil || limit <= 0 || limit > domainfeed.MaxLimit {
 		return 0, domainfeed.ErrInvalidLimit
 	}
 	return limit, nil

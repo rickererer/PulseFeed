@@ -13,6 +13,7 @@ import (
 )
 
 const defaultListLimit = 20
+const maxListLimit = 100
 
 type Handler struct {
 	service *applicationvideo.Service
@@ -171,9 +172,9 @@ func parsePagination(c *gin.Context) (int, int, error) {
 
 	rawLimit := strings.TrimSpace(c.Query("limit"))
 	if rawLimit != "" {
-		// limit 必须为正数，应用层会进一步限制最大值。
+		// limit 必须在 1-100 之间，超限直接拒绝（应用层 clamp 仅作兜底）。
 		value, err := strconv.Atoi(rawLimit)
-		if err != nil || value <= 0 {
+		if err != nil || value <= 0 || value > maxListLimit {
 			return 0, 0, domainvideo.ErrInvalidLimit
 		}
 		limit = value
