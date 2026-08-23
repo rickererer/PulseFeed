@@ -18,7 +18,7 @@ func NewJWTAuth(jwtManager *infrajwt.Manager) gin.HandlerFunc {
 		header := strings.TrimSpace(c.GetHeader("Authorization"))
 		if header == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "authorization header is required",
+				"error": "authorization header is required",
 			})
 			return
 		}
@@ -27,13 +27,13 @@ func NewJWTAuth(jwtManager *infrajwt.Manager) gin.HandlerFunc {
 		parts := strings.SplitN(header, " ", 2)
 		if len(parts) != 2 {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "authorization format must be Bearer <token>",
+				"error": "authorization format must be Bearer <token>",
 			})
 			return
 		}
 		if !strings.EqualFold(strings.TrimSpace(parts[0]), "Bearer") {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "authorization scheme must be Bearer",
+				"error": "authorization scheme must be Bearer",
 			})
 			return
 		}
@@ -42,7 +42,7 @@ func NewJWTAuth(jwtManager *infrajwt.Manager) gin.HandlerFunc {
 		claims, err := jwtManager.ParseAndValidateToken(token, infrajwt.TokenTypeAccess)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "invalid access token",
+				"error": "invalid access token",
 			})
 			return
 		}
@@ -60,14 +60,14 @@ func NewInternalTokenAuth(token string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if token == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "internal token is required",
+				"error": "internal token is required",
 			})
 			return
 		}
 		provided := strings.TrimSpace(c.GetHeader("X-Internal-Token"))
 		if subtle.ConstantTimeCompare([]byte(provided), []byte(token)) != 1 {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "invalid internal token",
+				"error": "invalid internal token",
 			})
 			return
 		}

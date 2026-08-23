@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -474,7 +475,10 @@ func writeUploadValidationError(c *gin.Context, err error) {
 
 func writeUploadProcessingError(c *gin.Context, err error) {
 	if errors.Is(err, errVideoToolUnavailable) || errors.Is(err, errFaststartFailed) {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		// 视频处理工具故障属于服务端错误，但不要向客户端泄漏内部错误细节，
+		// 真实原因写入日志供排查。
+		log.Printf("upload processing failed: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
