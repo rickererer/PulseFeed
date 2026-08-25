@@ -4,6 +4,7 @@ import (
 	domainfeed "github.com/rickererer/PulseFeed/internal/domain/feed"
 	inframetrics "github.com/rickererer/PulseFeed/internal/infra/metrics"
 	"context"
+	"log"
 	"time"
 )
 
@@ -115,6 +116,12 @@ func (w *FanoutWorker) HandleVideoPublished(ctx context.Context, event *Publishe
 	start := time.Now()
 	defer func() {
 		inframetrics.ObserveWorkerJob("video_fanout", time.Since(start), err)
+		if err != nil && event != nil {
+			// fanout 失败会导致新视频无法进入粉丝 Feed，必须留痕；消息未 ACK
+			// 会重投，日志用于判断是暂时性故障还是需要人工介入。
+			log.Printf("video fanout failed: video=%d author=%d err=%v",
+				event.VideoID, event.AuthorID, err)
+		}
 	}()
 
 	if event == nil || event.VideoID <= 0 || event.AuthorID <= 0 {

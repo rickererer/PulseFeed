@@ -4,6 +4,7 @@ import (
 	applicationvideo "github.com/rickererer/PulseFeed/internal/application/video"
 	inframetrics "github.com/rickererer/PulseFeed/internal/infra/metrics"
 	"context"
+	"log"
 	"time"
 )
 
@@ -35,6 +36,11 @@ func (w *VideoEmbeddingWorker) HandleVideoPublished(ctx context.Context, event *
 	start := time.Now()
 	defer func() {
 		inframetrics.ObserveWorkerJob("video_embedding", time.Since(start), err)
+		if err != nil && event != nil {
+			// embedding 生成失败会导致该视频无法进入向量检索，日志留痕供排查。
+			log.Printf("video embedding failed: video=%d author=%d err=%v",
+				event.VideoID, event.AuthorID, err)
+		}
 	}()
 
 	if w == nil || w.service == nil || event == nil {

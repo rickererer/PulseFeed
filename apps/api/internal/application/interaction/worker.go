@@ -4,6 +4,7 @@ import (
 	domaininteraction "github.com/rickererer/PulseFeed/internal/domain/interaction"
 	inframetrics "github.com/rickererer/PulseFeed/internal/infra/metrics"
 	"context"
+	"log"
 	"time"
 )
 
@@ -35,6 +36,12 @@ func (w *ActionWorker) HandleActionChanged(ctx context.Context, event *ActionCha
 	var err error
 	defer func() {
 		inframetrics.ObserveWorkerJob("interaction_action_changed", time.Since(start), err)
+		if err != nil && event != nil {
+			// 互动落库失败：用户已看到 Redis 快写反馈，这里必须留痕供对账，
+			// 否则错误只会反映在指标上而无法定位原因。
+			log.Printf("interaction action persist failed: user=%d video=%d type=%s active=%v err=%v",
+				event.UserID, event.VideoID, event.ActionType, event.Active, err)
+		}
 	}()
 
 	if event == nil {
