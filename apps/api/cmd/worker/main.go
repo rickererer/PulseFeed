@@ -22,6 +22,7 @@ import (
 
 	gormmysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 const configPath = "./configs/config.yaml"
@@ -44,7 +45,8 @@ func main() {
 	}
 	defer closeSQL(sqlDB)
 
-	gormDB, err := gorm.Open(gormmysql.New(gormmysql.Config{Conn: sqlDB}), &gorm.Config{})
+	// logger 限制为 Error 级，避免默认 Warn 级打印含参数（如密码哈希）的 SQL。
+	gormDB, err := gorm.Open(gormmysql.New(gormmysql.Config{Conn: sqlDB}), &gorm.Config{Logger: logger.Default.LogMode(logger.Error)})
 	if err != nil {
 		log.Fatalf("init gorm failed: %v", err)
 	}

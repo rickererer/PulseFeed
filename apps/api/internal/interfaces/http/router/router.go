@@ -44,14 +44,16 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	gormmysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // Register 负责后端依赖装配：数据库模型、仓储、Service、Handler、中间件和路由。
 func Register(g *gin.Engine, cfg *infraconfig.Config, db *sql.DB) error {
 	// database/sql 连接池交给 GORM 复用，避免维护两套数据库连接。
+	// logger 限制为 Error 级：默认 Warn 级会打印含参数（如密码哈希）的慢 SQL。
 	gormDB, err := gorm.Open(gormmysql.New(gormmysql.Config{
 		Conn: db,
-	}), &gorm.Config{})
+	}), &gorm.Config{Logger: logger.Default.LogMode(logger.Error)})
 	if err != nil {
 		return err
 	}
