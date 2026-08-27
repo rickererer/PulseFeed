@@ -27,6 +27,18 @@ const actionStatJSONTTL = 15 * time.Second
 const actionStatCounterShardCount = 16
 const followingIndexKeyTTL = 30 * 24 * time.Hour
 
+// Redis key 前缀集中定义，统一 key 命名空间，防止拼写漂移。
+const (
+	feedCardKeyPrefix          = "video:card:v1:"
+	feedStatKeyPrefix          = "video:stat:v1:"
+	followingInboxKeyPrefix    = "feed:following:inbox:v1:"
+	followingOutboxKeyPrefix   = "feed:following:author:v1:"
+	interactionActionKeyPrefix = "interaction:action:v1:"
+	interactionStatKeyPrefix   = "video:stat:counter:v1:"
+	hotMinuteKeyPrefix         = "feed:hot:minute:v1:"
+	hotWindowKeyPrefix         = "feed:hot:window:v1:"
+)
+
 type redisWatchCmdable interface {
 	redis.Cmdable
 	Pipeline() redis.Pipeliner
@@ -707,19 +719,19 @@ func cacheKeys(videoIDs []int64, build func(int64) string) []string {
 }
 
 func feedCardKey(videoID int64) string {
-	return fmt.Sprintf("video:card:v1:%d", videoID)
+	return fmt.Sprintf(feedCardKeyPrefix+"%d", videoID)
 }
 
 func feedStatKey(videoID int64) string {
-	return fmt.Sprintf("video:stat:v1:%d", videoID)
+	return fmt.Sprintf(feedStatKeyPrefix+"%d", videoID)
 }
 
 func followingInboxKey(userID int64) string {
-	return fmt.Sprintf("feed:following:inbox:v1:%d", userID)
+	return fmt.Sprintf(followingInboxKeyPrefix+"%d", userID)
 }
 
 func followingAuthorOutboxKey(authorID int64) string {
-	return fmt.Sprintf("feed:following:author:v1:%d", authorID)
+	return fmt.Sprintf(followingOutboxKeyPrefix+"%d", authorID)
 }
 
 func followingIndexScore(publishedAt time.Time, videoID int64) float64 {
@@ -774,11 +786,11 @@ func sortFeedPageItemsByTimeline(items []*domainfeed.FeedPageItem) {
 }
 
 func interactionActionKey(userID int64, videoID int64, actionType string) string {
-	return fmt.Sprintf("interaction:action:v1:%d:%d:%s", userID, videoID, strings.ToLower(actionType))
+	return fmt.Sprintf(interactionActionKeyPrefix+"%d:%d:%s", userID, videoID, strings.ToLower(actionType))
 }
 
 func interactionStatCounterKey(videoID int64) string {
-	return fmt.Sprintf("video:stat:counter:v1:%d", videoID)
+	return fmt.Sprintf(interactionStatKeyPrefix+"%d", videoID)
 }
 
 func interactionStatCounterBaseKey(videoID int64) string {
@@ -819,11 +831,11 @@ func clampRedisCount(value int) int {
 }
 
 func hotMinuteKey(at time.Time) string {
-	return fmt.Sprintf("feed:hot:minute:v1:%s", at.UTC().Truncate(time.Minute).Format("200601021504"))
+	return fmt.Sprintf(hotMinuteKeyPrefix+"%s", at.UTC().Truncate(time.Minute).Format("200601021504"))
 }
 
 func hotWindowKey(windowEnd time.Time) string {
-	return fmt.Sprintf("feed:hot:window:v1:%d", windowEnd.UTC().Truncate(time.Minute).Unix())
+	return fmt.Sprintf(hotWindowKeyPrefix+"%d", windowEnd.UTC().Truncate(time.Minute).Unix())
 }
 
 func hotWindowMinuteKeys(windowEnd time.Time) []string {
