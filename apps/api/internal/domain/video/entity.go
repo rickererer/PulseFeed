@@ -14,6 +14,9 @@ const (
 	MaxTitleLength          = 128
 	MaxDescriptionLength    = 512
 	MaxIdempotencyKeyLength = 128
+
+	// MaxLimit 列表接口单页上限，与 feed/interaction 领域保持一致。
+	MaxLimit = 100
 )
 
 // Video 是视频聚合根，包含内容信息、发布状态和统计快照。

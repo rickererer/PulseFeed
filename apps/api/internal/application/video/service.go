@@ -119,9 +119,9 @@ func (s *Service) ListByAuthor(ctx context.Context, authorID int64, limit, offse
 	if offset < 0 {
 		return nil, domainvideo.ErrInvalidOffset
 	}
-	if limit > 100 {
+	if limit > domainvideo.MaxLimit {
 		// 后端限制最大页大小，避免一次请求拉取过多数据。
-		limit = 100
+		limit = domainvideo.MaxLimit
 	}
 
 	videos, err := s.repo.ListByAuthor(ctx, authorID, limit, offset)
