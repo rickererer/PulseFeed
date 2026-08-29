@@ -170,22 +170,27 @@ func Register(g *gin.Engine, cfg *infraconfig.Config, db *sql.DB) error {
 	videos.POST("/:videoId/comments", authMiddleware, interactionHandler.CreateComment)
 	videos.GET("/:videoId/comments", interactionHandler.ListComments)
 
+	// 上传资源：创建上传任务，需要鉴权；文件通过 /uploads/... 静态访问。
 	uploads := api.Group("/uploads", authMiddleware)
 	uploads.POST("", uploadHandler.Create)
 
 	// Feed 暴露为条目集合，客户端通过游标和 limit 控制分页。
 	api.GET("/feed-items", optionalAuthMiddleware, feedHandler.ListFeedItems)
 	api.POST("/feed-queries", optionalAuthMiddleware, feedHandler.Query)
+	// 曝光事件上报：记录用户实际看到了哪些 Feed 项，供推荐和治理使用。
 	api.POST("/video-view-events", authMiddleware, exposureHandler.CreateViewEvent)
 	// 删除评论只需要评论自身 ID，所以放在顶层 comments 资源下。
 	api.DELETE("/comments/:commentId", authMiddleware, interactionHandler.DeleteComment)
+	// 消息资源：站内信列表、批量已读、未读统计。
 	api.GET("/messages", authMiddleware, messageHandler.List)
 	api.PATCH("/messages", authMiddleware, messageHandler.MarkRead)
 	api.GET("/message-stats/unread", authMiddleware, messageHandler.CountUnread)
+	// 播放资源：客户端拉取播放配置、预加载列表并上报播放质量（QoS）。
 	api.GET("/playback-config", authMiddleware, playbackHandler.GetConfig)
 	api.GET("/preload-videos", authMiddleware, playbackHandler.ListPreloadVideos)
 	api.POST("/playback-qos-reports", authMiddleware, playbackHandler.CreateQoSReport)
 
+	// 内部服务接口：供推荐/消息/播放等内部链路调用，部分接口带内部 token 鉴权。
 	internal := g.Group("/internal")
 	internal.POST("/recommendation-candidates", recommendationHandler.ListCandidates)
 	internal.POST("/exposure-decisions", recommendationHandler.DecideExposures)
