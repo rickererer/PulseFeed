@@ -72,7 +72,11 @@ func NewFeedCache(client redisWatchCmdable) *FeedCache {
 
 // GetPage 读取缓存中的轻量 Feed 页。
 func (c *FeedCache) GetPage(ctx context.Context, key string) (*applicationfeed.FeedPage, bool, error) {
-	content, err := c.client.Get(ctx, key).Bytes()
+	return getPage(ctx, c.client, key)
+}
+
+func getPage(ctx context.Context, client redisActionStatReader, key string) (*applicationfeed.FeedPage, bool, error) {
+	content, err := client.Get(ctx, key).Bytes()
 	if err == redis.Nil {
 		inframetrics.ObserveCacheRead("page", 1, 0, nil)
 		return nil, false, nil
@@ -93,24 +97,32 @@ func (c *FeedCache) GetPage(ctx context.Context, key string) (*applicationfeed.F
 
 // SetPage 写入轻量 Feed 页，并设置过期时间。
 func (c *FeedCache) SetPage(ctx context.Context, key string, page *applicationfeed.FeedPage, ttl time.Duration) error {
+	return setPage(ctx, c.client, key, page, ttl)
+}
+
+func setPage(ctx context.Context, client redisActionStatWriter, key string, page *applicationfeed.FeedPage, ttl time.Duration) error {
 	content, err := json.Marshal(page)
 	if err != nil {
 		inframetrics.ObserveCacheWrite("page", 1, err)
 		return err
 	}
-	err = c.client.Set(ctx, key, content, ttl).Err()
+	err = client.Set(ctx, key, content, ttl).Err()
 	inframetrics.ObserveCacheWrite("page", 1, err)
 	return err
 }
 
 // GetCards 批量读取视频卡片缓存。
 func (c *FeedCache) GetCards(ctx context.Context, videoIDs []int64) (map[int64]*domainfeed.FeedCard, error) {
+	return getCards(ctx, c.client, videoIDs)
+}
+
+func getCards(ctx context.Context, client redisStatCacheClient, videoIDs []int64) (map[int64]*domainfeed.FeedCard, error) {
 	cards := map[int64]*domainfeed.FeedCard{}
 	if len(videoIDs) == 0 {
 		return cards, nil
 	}
 
-	values, err := c.client.MGet(ctx, cacheKeys(videoIDs, feedCardKey)...).Result()
+	values, err := client.MGet(ctx, cacheKeys(videoIDs, feedCardKey)...).Result()
 	if err != nil {
 		inframetrics.ObserveCacheRead("card", len(videoIDs), 0, err)
 		return nil, err

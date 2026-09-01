@@ -1,6 +1,8 @@
 package infracache
 
 import (
+	applicationfeed "github.com/rickererer/PulseFeed/internal/application/feed"
+	domainfeed "github.com/rickererer/PulseFeed/internal/domain/feed"
 	domaininteraction "github.com/rickererer/PulseFeed/internal/domain/interaction"
 	"context"
 	"encoding/json"
@@ -179,5 +181,81 @@ func TestActionStatBaseInitUsesInitialStat(t *testing.T) {
 	stat := actionStatBaseInit(videoID, initial)
 	if stat != initial {
 		t.Fatalf("unexpected stat: %+v", stat)
+	}
+}
+
+// TestPageCacheRoundTrip 验证页缓存写入后命中返回相同内容，未命中返回 miss 而非错误。
+func TestPageCacheRoundTrip(t *testing.T) {
+	client := newActionStatFakeRedis()
+	ctx := context.Background()
+	key := "feed:page:test:1"
+	want := &applicationfeed.FeedPage{
+		Scene:      domainfeed.SceneTimeline,
+		Items:      []*domainfeed.FeedPageItem{{VideoID: 1, AuthorID: 2}},
+		NextCursor: "cursor-1",
+	}
+
+	if err := setPage(ctx, client, key, want, time.Minute); err != nil {
+		t.Fatalf("setPage failed: %v", err)
+	}
+
+	got, hit, err := getPage(ctx, client, key)
+	if err != nil || !hit {
+		t.Fatalf("getPage hit=%v err=%v, want hit=true err=nil", hit, err)
+	}
+	if got.Scene != want.Scene || got.NextCursor != want.NextCursor {
+		t.Fatalf("page mismatch: %+v", got)
+	}
+	if len(got.Items) != 1 || got.Items[0].VideoID != 1 {
+		t.Fatalf("items mismatch: %+v", got.Items)
+	}
+
+	if _, hit, err := getPage(ctx, client, "feed:page:missing"); err != nil || hit {
+		t.Fatalf("missing key: hit=%v err=%v, want hit=false err=nil", hit, err)
+	}
+}
+
+// TestGetCardsPartialHit 验证卡片缓存部分命中：命中的返回，未命中的跳过。
+func TestGetCardsPartialHit(t *testing.T) {
+	client := newActionStatFakeRedis()
+	ctx := context.Background()
+	publishedAt := time.Date(2026, 9, 1, 10, 0, 0, 0, time.UTC)
+
+	// 预填两个卡片 JSON，模拟 SetCards 已写入后的缓存状态。
+	for _, card := range []*domainfeed.FeedCard{
+		{VideoID: 1, AuthorID: 10, Title: "one", PublishedAt: publishedAt},
+		{VideoID: 2, AuthorID: 10, Title: "two", PublishedAt: publishedAt},
+	} {
+		content, err := json.Marshal(card)
+		if err != nil {
+			t.Fatalf("marshal card: %v", err)
+		}
+		client.values[feedCardKey(card.VideoID)] = string(content)
+	}
+
+	got, err := getCards(ctx, client, []int64{1, 2, 3})
+	if err != nil {
+		t.Fatalf("getCards failed: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("cards = %d entries, want 2 (partial hit)", len(got))
+	}
+	if got[1].Title != "one" || got[2].Title != "two" {
+		t.Fatalf("card content mismatch: %+v %+v", got[1], got[2])
+	}
+	if _, ok := got[3]; ok {
+		t.Fatal("missing video should not appear in result")
+	}
+}
+
+// TestGetCardsEmptyInput 验证空入参直接返回空结果。
+func TestGetCardsEmptyInput(t *testing.T) {
+	client := newActionStatFakeRedis()
+	got, err := getCards(context.Background(), client, nil)
+	if err != nil {
+		t.Fatalf("getCards failed: %v", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("cards = %d entries, want 0", len(got))
 	}
 }
