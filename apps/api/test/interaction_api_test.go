@@ -443,15 +443,20 @@ func TestInteractionValidation(t *testing.T) {
 
 	badLike := performJSONRequest(router, http.MethodPut, "/api/videos/0/like", "", token)
 	requireStatus(t, badLike, http.StatusBadRequest)
+	// 错误响应使用统一 {"error": "..."} 结构，客户端依赖该契约解析失败原因。
+	requireErrorEnvelope(t, badLike)
 
 	missingVideo := performJSONRequest(router, http.MethodPut, "/api/videos/404/like", "", token)
 	requireStatus(t, missingVideo, http.StatusNotFound)
+	requireErrorEnvelope(t, missingVideo)
 
 	emptyComment := performJSONRequest(router, http.MethodPost, "/api/videos/1001/comments", `{"content":"   "}`, token)
 	requireStatus(t, emptyComment, http.StatusBadRequest)
+	requireErrorEnvelope(t, emptyComment)
 
 	badList := performJSONRequest(router, http.MethodGet, "/api/videos/1001/comments?limit=0", "", "")
 	requireStatus(t, badList, http.StatusBadRequest)
+	requireErrorEnvelope(t, badList)
 }
 
 // TestInteractionHotScoreRecorder 覆盖真实互动变化写入热榜增量。

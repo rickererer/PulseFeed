@@ -376,3 +376,16 @@ func requireStatus(t *testing.T, resp *httptest.ResponseRecorder, expected int) 
 		t.Fatalf("expected status %d, got %d body=%s", expected, resp.Code, resp.Body.String())
 	}
 }
+
+// requireErrorEnvelope 断言错误响应符合统一 {"error": "..."} 契约（见统一错误响应改造）。
+func requireErrorEnvelope(t *testing.T, resp *httptest.ResponseRecorder) {
+	t.Helper()
+
+	var body map[string]any
+	if err := json.Unmarshal(resp.Body.Bytes(), &body); err != nil {
+		t.Fatalf("error response is not valid JSON: %q", resp.Body.String())
+	}
+	if _, ok := body["error"]; !ok {
+		t.Fatalf("error response missing \"error\" field: %q", resp.Body.String())
+	}
+}

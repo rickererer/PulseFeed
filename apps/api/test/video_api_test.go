@@ -226,6 +226,12 @@ func TestVideoAPIFlow(t *testing.T) {
 	getResponse := performJSONRequest(router, http.MethodGet, fmt.Sprintf("/api/videos/%d", created.ID), "", "")
 	requireStatus(t, getResponse, http.StatusOK)
 
+	var fetched videoAPIResponse
+	decodeJSON(t, getResponse, &fetched)
+	if fetched.ID != created.ID || fetched.Title != "first video" || fetched.Status != domainvideo.StatusPublished {
+		t.Fatalf("unexpected get response: %+v", fetched)
+	}
+
 	listResponse := performJSONRequest(router, http.MethodGet, "/api/users/42/videos?limit=10&offset=0", "", "")
 	requireStatus(t, listResponse, http.StatusOK)
 
