@@ -51,6 +51,19 @@ jobs:
       - name: Show coverage summary
         run: go tool cover -func=coverage.out | tail -20
 
+      # 覆盖率防退化门槛：基线 9.1%（2026-09），随测试补充逐步提高。
+      # M1-M3 测试深化已使覆盖率翻倍；未覆盖部分主要为需要真实 DB/Redis
+      # 的 infra 持久化层，后续里程碑继续补测后再抬阈值。
+      - name: Enforce coverage threshold
+        run: |
+          TOTAL=$(go tool cover -func=coverage.out | grep total | awk '{gsub(/%/, "", $3); print $3}')
+          THRESHOLD=8
+          echo "total coverage: ${TOTAL}% (threshold ${THRESHOLD}%)"
+          if awk "BEGIN{exit !(${TOTAL} < ${THRESHOLD})}"; then
+            echo "::error::coverage ${TOTAL}% is below the ${THRESHOLD}% threshold"
+            exit 1
+          fi
+
   web:
     name: Frontend (React)
     runs-on: ubuntu-latest
