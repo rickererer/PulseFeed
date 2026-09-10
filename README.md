@@ -10,6 +10,7 @@
 
 <p align="center">
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square&color=3b82f6&labelColor=161b22" alt="License: MIT"/></a>
+  <a href="https://github.com/rickererer/PulseFeed/actions/workflows/ci.yml"><img src="https://github.com/rickererer/PulseFeed/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"/></a>
   <a href="https://go.dev/"><img src="https://img.shields.io/badge/Go-1.26-blue.svg?style=flat-square&color=00ADD8&labelColor=161b22&logo=go&logoColor=white" alt="Go"/></a>
   <a href="https://gin-gonic.com/"><img src="https://img.shields.io/badge/Gin-1.12-blue.svg?style=flat-square&color=008080&labelColor=161b22" alt="Gin"/></a>
   <a href="https://gorm.io/"><img src="https://img.shields.io/badge/GORM-1.31-blue.svg?style=flat-square&color=10B981&labelColor=161b22" alt="GORM"/></a>
