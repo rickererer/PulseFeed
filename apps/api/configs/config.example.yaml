@@ -1,0 +1,52 @@
+# PulseFeed API 配置模板
+#
+# 用法：复制为 config.yaml 并填入本机实际值
+#   cp configs/config.example.yaml configs/config.yaml
+#
+# 该文件对应 internal/infra/config 的 Config 结构体；字段缺省或非法会在
+# 启动时由 Config.Validate 直接报错（fail fast），不会静默使用默认值。
+#
+# 容器内运行请使用 config.docker.yaml（host 指向 compose 服务名）。
+
+# API 监听端口，取值 1-65535。
+port: 8080
+
+jwt:
+  # 签发/校验访问令牌的对称密钥。生产环境务必换成足够长度的随机串。
+  secret: "replace-with-strong-secret"
+  # 访问令牌有效期，Go duration 格式（如 15m、1h）。
+  access_ttl: "15m"
+
+internal:
+  # 内部接口（/internal/*）的调用令牌，需与调用方一致。
+  token: "replace-with-internal-token"
+
+database:
+  host: "localhost"
+  port: 3306
+  user: "root"
+  # 本地 compose 环境的默认值见 apps/docker-compose.yml 的 MYSQL_ROOT_PASSWORD；
+  # 生产环境请改为独立强凭据（不要复用开发默认值）。
+  password: "replace-with-db-password"
+  name: "PulseFeed"
+
+redis:
+  # 地址形如 host:port；本地需先启动 Redis。
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+# RabbitMQ 为可选项：url 留空则上层禁用异步队列，
+# 相关 consumer 与 publish 路径不会启动。
+rabbitmq:
+  url: "amqp://guest:guest@localhost:5672/"
+  interaction_exchange: "pulsefeed.interaction"
+  action_changed_queue: "pulsefeed.interaction.action_changed"
+  action_changed_routing: "interaction.action_changed"
+  video_exchange: "pulsefeed.video"
+  video_published_queue: "pulsefeed.video.published"
+  video_embedding_queue: "pulsefeed.video.embedding"
+  video_published_routing: "video.published"
+  exposure_exchange: "pulsefeed.exposure"
+  view_event_recorded_queue: "pulsefeed.exposure.view_event_recorded"
+  view_event_recorded_routing: "exposure.view_event_recorded"

@@ -26,6 +26,21 @@ cd apps && docker compose up -d --build
 cd apps/api && go run ./cmd/feed
 ```
 
+## 配置
+
+后端配置来自 `apps/api/configs/config.yaml`。配置由 YAML 文件直接读取（**不读取环境变量**），因此每次调整都改文件本身：
+
+```bash
+cp apps/api/configs/config.example.yaml apps/api/configs/config.yaml
+```
+
+随后按本机环境填写。注意事项：
+
+- `config.example.yaml` 是字段模板，敏感项一律为占位符；**真实凭据不要提交**，本地覆盖可放在 `config.local.yaml`（已在 `.gitignore`）
+- 容器内运行使用 `config.docker.yaml`，其中 host 指向 compose 服务名（`mysql` / `redis` / `rabbitmq`）
+- 字段缺失或非法会在启动阶段由 `Config.Validate` 直接报错，不会静默使用默认值
+- RabbitMQ 为可选项：`rabbitmq.url` 留空即禁用异步队列（相关 consumer 与 publish 路径不启动）
+
 ## 常用命令
 
 根目录 Makefile 提供统一入口：

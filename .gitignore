@@ -16,6 +16,10 @@ apps/api/bin/
 apps/web/node_modules/
 apps/web/dist/
 
+# Local configuration overrides (never commit real credentials)
+.env.local
+apps/api/configs/config.local.yaml
+
 # IDE
 .idea/
 .vscode/
